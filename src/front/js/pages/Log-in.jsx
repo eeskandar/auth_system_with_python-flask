@@ -31,7 +31,7 @@ export const LogIn = () => {
       <h1 className="m-0">You are a member? Shhh...</h1>
       <h2>don't say nothing...</h2>
       <h4 className="mb-5">just Log in...</h4>
-      <form onSubmit={(e) => e.preventDefault}>
+      <form onSubmit={(e) => e.preventDefault()}>
         <div className="mb-3">
           <label htmlFor="exampleInputEmail1" className="form-label">
             Email address
@@ -71,8 +71,6 @@ export const LogIn = () => {
             if (email.trim() != "" && password.trim() != "") {
               login(email, password);
               //sin estos set, la página de login simplemente se refresca
-              setEmail("a");
-              setPassword("b");
             }
           }}
         >
