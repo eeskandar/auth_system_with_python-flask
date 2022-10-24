@@ -4,15 +4,99 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, User
 from api.utils import generate_sitemap, APIException
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
+import os, bcrypt
 
 api = Blueprint('api', __name__)
+app = Flask(__name__)
 
 
-@api.route('/hello', methods=['POST', 'GET'])
-def handle_hello():
+@api.route('/sign-up', methods=['POST'])
+def register_user():
+    body = request.json
+    unrefined_salt = bcrypt.gensalt()
+    salt = unrefined_salt.decode()
+    hashed_password = generate_password_hash(f'{body["password"]}{salt}')
+
+    if not body.get("username"):
+        return jsonify({
+            "msg": "You must set a username"
+        }), 400
+    username_exist = User.query.filter_by(username = body["username"]).one_or_none()
+    if username_exist:
+        return jsonify({
+            "msg": "This username is already taken. Try another one"
+        }), 400
+    
+    if not body.get("email"):
+        return jsonify({
+            "msg": "You must write a valid email",
+        }), 400
+    email_exist = User.query.filter_by(email = body["email"]).one_or_none()
+    if email_exist:
+        return jsonify({
+            "msg": "You must write a valid email",
+        }), 400
+
+    new_user = User(
+        username = body["username"],
+        email = body["email"],
+        password = hashed_password,
+        salt = salt,
+        is_active = True
+    )
+
+    if not isinstance(new_user, User):
+        return jsonify({
+            "msg": "Server error"
+        }), 500
+
+    db.session.add(new_user)
+    db.session.commit()
 
     response_body = {
-        "message": "Hello! I'm a message that came from the backend, check the network tab on the google inspector and you will see the GET request"
+        "message": "New user created!",
+        "username": new_user.username
+    }
+
+    return jsonify(response_body), 200
+
+
+@api.route('/login', methods=['POST'])
+def log_user():
+    body = request.json
+    user = User.query.filter_by(email = body["email"]).one_or_none()
+    if not user:
+        return jsonify({
+            "msg": "Email or password invalid"
+        }), 400
+
+    valid_password = check_password_hash(user.password, f'{body["password"]}{user.salt}')
+    if not valid_password:
+        return jsonify({
+            "msg": "Email or password invalid"
+        }), 400
+
+    access_token = create_access_token(identity=user.id)
+    response_body = {
+        "msg": "Welcome back, " + user.username,
+        "id": user.id,
+        "token": access_token
+    }
+
+    return jsonify(response_body), 200
+
+
+@api.route('/user/<int:userid>')
+@jwt_required()
+def get_user(userid):
+    user = get_jwt_identity()
+    get_user = User.query.get_or_404(userid)
+    
+    response_body = {
+        "username": get_user.username,
+        "email": get_user.email
     }
 
     return jsonify(response_body), 200
