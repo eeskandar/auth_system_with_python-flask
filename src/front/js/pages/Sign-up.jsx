@@ -21,14 +21,22 @@ export const SignUp = () => {
       if (!response.ok) {
         new Error("Ocurrió un error en la solicitud");
       }
-      navigate("/login");
+      const body = await response.json();
+      if (body.msg == "Invalid email") {
+        alert("Invalid email. Try with another one");
+      } else if (body.msg == "Username already taken") {
+        alert("This username already exist. Try another one");
+      } else {
+        alert("Welcome to the club!");
+        navigate("/login");
+      }
     } catch (error) {}
   }
 
   return (
     <div className="container mt-5">
       <h1 className="mb-5">Register yourself in the Club</h1>
-      <form>
+      <form onSubmit={(e) => e.preventDefault()}>
         <div className="mb-3">
           <label htmlFor="exampleInputUser" className="form-label">
             Username
@@ -97,10 +105,6 @@ export const SignUp = () => {
               alert("You must set a password");
             } else {
               createUser(username, email, password);
-              setUsername("a");
-              setEmail("b");
-              setPassword("c");
-              alert("Welcome to the club!");
             }
           }}
         >

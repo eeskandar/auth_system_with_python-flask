@@ -21,8 +21,12 @@ export const LogIn = () => {
         new Error("Ocurrió un error en la solicitud");
       }
       const body = await response.json();
-      localStorage.setItem("token", body.token);
-      navigate("/user/" + body.id);
+      if (body.token == undefined) {
+        alert("Email or password Invalid");
+      } else {
+        localStorage.setItem("token", body.token);
+        navigate("/user/" + body.id);
+      }
     } catch (error) {}
   }
 
@@ -70,7 +74,6 @@ export const LogIn = () => {
           onClick={(e) => {
             if (email.trim() != "" && password.trim() != "") {
               login(email, password);
-              //sin estos set, la página de login simplemente se refresca
             }
           }}
         >

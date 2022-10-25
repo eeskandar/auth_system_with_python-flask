@@ -21,22 +21,22 @@ def register_user():
 
     if not body.get("username"):
         return jsonify({
-            "msg": "You must set a username"
+            "msg": "Invalid username"
         }), 400
     username_exist = User.query.filter_by(username = body["username"]).one_or_none()
     if username_exist:
         return jsonify({
-            "msg": "This username is already taken. Try another one"
+            "msg": "Username already taken"
         }), 400
     
     if not body.get("email"):
         return jsonify({
-            "msg": "You must write a valid email",
+            "msg": "Invalid email",
         }), 400
     email_exist = User.query.filter_by(email = body["email"]).one_or_none()
     if email_exist:
         return jsonify({
-            "msg": "You must write a valid email",
+            "msg": "Invalid email",
         }), 400
 
     new_user = User(
@@ -67,7 +67,7 @@ def register_user():
 def log_user():
     body = request.json
     user = User.query.filter_by(email = body["email"]).one_or_none()
-    if not user:
+    if user is None:
         return jsonify({
             "msg": "Email or password invalid"
         }), 400
