@@ -72,7 +72,11 @@ export const LogIn = () => {
           type="submit"
           className="btn btn-primary"
           onClick={(e) => {
-            if (email.trim() != "" && password.trim() != "") {
+            if (email.trim() == "") {
+              alert("Email can't be empty");
+            } else if (password.trim() == "") {
+              alert("Your password can't be empty");
+            } else {
               login(email, password);
             }
           }}
