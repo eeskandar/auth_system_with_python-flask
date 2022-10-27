@@ -21,7 +21,6 @@ export const ProfileInfo = () => {
         new Error("Ocurrió un error en la solicitud");
       }
       const body = await response.json();
-      console.log(body);
       setUser(body);
     } catch (error) {}
   }

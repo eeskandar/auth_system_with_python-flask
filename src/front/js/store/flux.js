@@ -15,18 +15,37 @@ const getState = ({ getStore, getActions, setStore }) => {
         },
       ],
       //////////////////////////////////////////////////////////////////////////////
-      users: [],
+      activeUser: [{ id: "Guest" }],
     },
     actions: {
-      // Use getActions to call a function within a fuction
-      setUsers: (username, email, password) => {
-        const store = getStore();
-        setFavorites({
-          users: [
-            ...store.users,
-            { username: username, email: email, password: password },
-          ],
-        }); // need to hash the password to pass it to the db
+      setActiveUser: (user) => {
+        setStore({
+          activeUser: [user],
+        });
+      },
+      login: async (email, password) => {
+        try {
+          let user;
+          user = { email: email, password: password };
+          const response = await fetch(process.env.BACKEND_URL + "/api/login", {
+            method: "POST",
+            body: JSON.stringify(user),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+          if (!response.ok) {
+            new Error("Ocurrió un error en la solicitud");
+          }
+          const body = await response.json();
+          getActions().setActiveUser(body);
+          console.log(activeUser);
+          if (body.token == undefined) {
+            alert("Email or password Invalid");
+          } else {
+            localStorage.setItem("token", body.token);
+          }
+        } catch (error) {}
       },
       ///////////////////////////////////////////////////////////////////////////////
       exampleFunction: () => {

@@ -82,6 +82,7 @@ def log_user():
     response_body = {
         "msg": "Welcome back, " + user.username,
         "id": user.id,
+        "username": user.username,
         "token": access_token
     }
 
@@ -95,6 +96,7 @@ def get_user(userid):
     get_user = User.query.get_or_404(userid)
     
     response_body = {
+        "id": get_user.id,
         "username": get_user.username,
         "email": get_user.email
     }
