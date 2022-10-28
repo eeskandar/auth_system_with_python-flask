@@ -55,10 +55,9 @@ def register_user():
     saved = new_user.add_and_commit()
 
     if saved is False:
-        raise Exception({
-            "message": "Data Base error",
-            "status": 500
-        })
+        return jsonify()({
+            "msg": "Data Base error"
+        }), 500
 
     response_body = {
         "message": "New user created!",
