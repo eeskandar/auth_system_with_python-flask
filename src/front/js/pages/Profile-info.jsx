@@ -1,29 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Context } from "./../store/appContext";
 
 export const ProfileInfo = () => {
-  const [user, setUser] = useState({});
-  const params = useParams();
+  const { store, actions } = useContext(Context);
   const navigate = useNavigate();
-
-  async function getUser(userid) {
-    try {
-      const response = await fetch(
-        process.env.BACKEND_URL + `/api/user/${userid}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      if (!response.ok) {
-        new Error("Ocurrió un error en la solicitud");
-      }
-      const body = await response.json();
-      setUser(body);
-    } catch (error) {}
-  }
+  const params = useParams();
+  const getUser = actions.getUser;
 
   useEffect(() => {
     if (localStorage.getItem("token") == null) {
@@ -35,7 +18,7 @@ export const ProfileInfo = () => {
 
   return (
     <div className="container">
-      <h1>Welcome back, {user.username}</h1>
+      <h1>Welcome back, {store.activeUser[0].username}</h1>
       <img src="https://static.dw.com/image/17301623_303.jpg" />
     </div>
   );

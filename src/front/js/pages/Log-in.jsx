@@ -3,37 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Context } from "./../store/appContext";
 
 export const LogIn = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const { store, actions } = useContext(Context);
   const navigate = useNavigate();
-  const activeUser = store.activeUser;
-  const setActiveUser = actions.setActiveUser;
-
-  async function login(email, password) {
-    try {
-      let user;
-      user = { email: email, password: password };
-      const response = await fetch(process.env.BACKEND_URL + "/api/login", {
-        method: "POST",
-        body: JSON.stringify(user),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (!response.ok) {
-        new Error("Ocurrió un error en la solicitud");
-      }
-      const body = await response.json();
-      setActiveUser(body);
-      if (body.token == undefined) {
-        alert("Email or password Invalid");
-      } else {
-        localStorage.setItem("token", body.token);
-        navigate("/user/" + body.id);
-      }
-    } catch (error) {}
-  }
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const login = actions.login;
 
   return (
     <div className="container mt-5">
@@ -76,13 +50,17 @@ export const LogIn = () => {
         <button
           type="submit"
           className="btn btn-primary"
-          onClick={(e) => {
+          onClick={async (e) => {
             if (email.trim() == "") {
               alert("Email can't be empty");
             } else if (password.trim() == "") {
               alert("Your password can't be empty");
             } else {
-              login(email, password);
+              let success = await login(email, password);
+              if (success == true) {
+                return navigate("/user/" + store.activeUser[0].id);
+              }
+              alert("Email or password Invalid");
             }
           }}
         >

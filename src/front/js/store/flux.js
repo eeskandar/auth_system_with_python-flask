@@ -23,6 +23,35 @@ const getState = ({ getStore, getActions, setStore }) => {
           activeUser: [user],
         });
       },
+
+      createUser: async (username, email, password) => {
+        try {
+          let newUser;
+          newUser = { username: username, email: email, password: password };
+          const response = await fetch(
+            process.env.BACKEND_URL + "/api/sign-up",
+            {
+              method: "POST",
+              body: JSON.stringify(newUser),
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          if (!response.ok) {
+            new Error("Ocurrió un error en la solicitud");
+          }
+          const body = await response.json();
+          if (body.msg == "Invalid email") {
+            return "0";
+          } else if (body.msg == "Username already taken") {
+            return "1";
+          } else {
+            return "2";
+          }
+        } catch (error) {}
+      },
+
       login: async (email, password) => {
         try {
           let user;
@@ -38,14 +67,36 @@ const getState = ({ getStore, getActions, setStore }) => {
             new Error("Ocurrió un error en la solicitud");
           }
           const body = await response.json();
-          getActions().setActiveUser(body);
-          console.log(activeUser);
           if (body.token == undefined) {
-            alert("Email or password Invalid");
+            return false;
           } else {
+            getActions().setActiveUser(body);
             localStorage.setItem("token", body.token);
+            return true;
           }
         } catch (error) {}
+      },
+      getUser: async (userid) => {
+        try {
+          const response = await fetch(
+            process.env.BACKEND_URL + `/api/user/${userid}`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+          if (!response.ok) {
+            new Error("Ocurrió un error en la solicitud");
+          }
+          const body = await response.json();
+          getActions().setActiveUser(body);
+        } catch (error) {}
+      },
+      logout: () => {
+        localStorage.removeItem("token");
+        getActions().setActiveUser({ id: "Guest" });
       },
       ///////////////////////////////////////////////////////////////////////////////
       exampleFunction: () => {

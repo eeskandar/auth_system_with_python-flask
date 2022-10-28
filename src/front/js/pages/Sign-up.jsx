@@ -1,37 +1,14 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Context } from "./../store/appContext";
 
 export const SignUp = () => {
+  const { store, actions } = useContext(Context);
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
-
-  async function createUser(username, email, password) {
-    try {
-      let newUser;
-      newUser = { username: username, email: email, password: password };
-      const response = await fetch(process.env.BACKEND_URL + "/api/sign-up", {
-        method: "POST",
-        body: JSON.stringify(newUser),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (!response.ok) {
-        new Error("Ocurrió un error en la solicitud");
-      }
-      const body = await response.json();
-      if (body.msg == "Invalid email") {
-        alert("Invalid email. Try with another one");
-      } else if (body.msg == "Username already taken") {
-        alert("This username already exist. Try another one");
-      } else {
-        alert("Welcome to the club!");
-        navigate("/login");
-      }
-    } catch (error) {}
-  }
+  const createUser = actions.createUser;
 
   return (
     <div className="container mt-5">
@@ -96,7 +73,7 @@ export const SignUp = () => {
         </div>
         <button
           className="btn btn-primary me-3"
-          onClick={(event) => {
+          onClick={async (e) => {
             if (username.trim() == "") {
               alert("Name can't be empty");
             } else if (email.trim() == "") {
@@ -104,7 +81,14 @@ export const SignUp = () => {
             } else if (password.trim() == "") {
               alert("You must set a password");
             } else {
-              createUser(username, email, password);
+              let userCreated = await createUser(username, email, password);
+              if (userCreated == "0") {
+                return alert("Invalid email. Try with another one");
+              } else if (userCreated == "1") {
+                return alert("This username already exist. Try another one");
+              }
+              alert("Welcome to the club!");
+              navigate("/login");
             }
           }}
         >

@@ -6,13 +6,7 @@ export const Navbar = () => {
   const { store, actions } = useContext(Context);
   const navigate = useNavigate();
   const activeUser = store.activeUser;
-  const setActiveUser = actions.setActiveUser;
-
-  function logout() {
-    localStorage.removeItem("token");
-    setActiveUser({ id: "Guest" });
-    navigate("/");
-  }
+  const logout = actions.logout;
 
   return (
     <nav className="navbar navbar-light bg-light">
@@ -21,7 +15,7 @@ export const Navbar = () => {
           <span className="navbar-brand mb-0 h1">The "Club"</span>
         </Link>
         <div className="ml-auto">
-          {activeUser[0].id == "Guest" ? (
+          {localStorage.getItem("token") == null ? (
             <div>
               <Link to="/sign-up">
                 <button className="btn btn-primary me-2">Register now!</button>
@@ -36,7 +30,13 @@ export const Navbar = () => {
                 <button className="btn btn-primary me-2">Profile</button>
               </Link>
               <Link to="/">
-                <button className="btn btn-secondary" onClick={(e) => logout()}>
+                <button
+                  className="btn btn-secondary"
+                  onClick={(e) => {
+                    logout();
+                    navigate("/");
+                  }}
+                >
                   Log-out
                 </button>
               </Link>
