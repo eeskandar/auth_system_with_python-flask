@@ -20,6 +20,15 @@ class User(db.Model):
             # do not serialize the password, its a security breach
         }
 
+    def add_and_commit(self):
+        try:
+            db.session.add(self)
+            db.session.commit() 
+            return True
+        except error:
+            db.session.rollback()
+            return False
+
     @classmethod
     def create(cls, body):
         try:

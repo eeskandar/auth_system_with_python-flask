@@ -52,8 +52,13 @@ def register_user():
             "msg": "Server error"
         }), 500
 
-    db.session.add(new_user)
-    db.session.commit()
+    saved = new_user.add_and_commit()
+
+    if saved is False:
+        raise Exception({
+            "message": "Data Base error",
+            "status": 500
+        })
 
     response_body = {
         "message": "New user created!",
