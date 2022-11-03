@@ -25,7 +25,7 @@ class User(db.Model):
             db.session.add(self)
             db.session.commit() 
             return True
-        except error:
+        except Exception as error:
             db.session.rollback()
             return False
 
